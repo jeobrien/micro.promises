@@ -55,7 +55,9 @@ var addNewUserToDatabase = function(user, callback) {
 
 // Chaining lets us get rid of the entire pyramid of doom!!
 
-Promise.promisifyAll(db)
+Promise.promisifyAll(db);
+Promise.promisifyAll(fs);
+
 
 var addNewUserToDatabaseAsync = function(user) {
   // The outermost `return` lets us continue the chain
@@ -79,14 +81,14 @@ var addNewUserToDatabaseAsync = function(user) {
 // Uncomment the lines below and run the example with `node exercises/bare_minimum/chaining.js`
 // It will succeed most of the time, but fail occasionally to demonstrate error handling
 
-// addNewUserToDatabaseAsync({ name: 'Dan', password: 'chickennuggets' })
-//   .then(function(savedUser) {
-//     console.log('All done!')
-//   })
-//   .catch(function(err) {
-//     // Will catch any promise rejections or thrown errors in the chain!
-//     console.log('Oops, caught an error: ', err.message)
-//   });
+addNewUserToDatabaseAsync({ name: 'Dan', password: 'chickennuggets' })
+  .then(function(savedUser) {
+    console.log('All done!')
+  })
+  .catch(function(err) {
+    // Will catch any promise rejections or thrown errors in the chain!
+    console.log('Oops, caught an error: ', err.message)
+  });
 
 /******************************************************************
  *                         Exercises                              *
@@ -105,7 +107,18 @@ var getGitHubProfileAsync = require('./promisification').getGitHubProfileAsync
 
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
-  // TODO
+  return pluckFirstLineFromFileAsync(readFilePath)
+  .then(function(firstLine) {
+    getGitHubProfileAsync(firstLine)
+    .then(function(JSONResponse) {
+      // write response to writeFilePath
+      var str = JSON.stringify(JSONResponse);
+      fs.writeFileAsync(writeFilePath, str);
+    })
+  })
+  .catch(function (err) {
+    console.log('err')
+  });
 };
 
 module.exports = {
